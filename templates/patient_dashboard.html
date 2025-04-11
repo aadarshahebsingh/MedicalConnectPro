@@ -17,37 +17,22 @@
                     <p class="lead text-center mb-4">Tell us about your symptoms so we can connect you with the right medical specialist.</p>
                     
                     <form action="{{ url_for('patient_dashboard') }}" method="POST" class="symptom-form">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="age" class="form-label">Age</label>
-                                <input type="number" class="form-control" id="age" name="age" min="1" max="120" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="gender" class="form-label">Gender</label>
-                                <select class="form-select" id="gender" name="gender" required>
-                                    <option value="" selected disabled>Select gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="contact" class="form-label">Contact Number</label>
-                            <input type="tel" class="form-control" id="contact" name="contact" placeholder="+91 XXXXXXXXXX" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="symptoms" class="form-label">Describe Your Symptoms <small class="text-muted">(Be as detailed as possible)</small></label>
-                            <textarea class="form-control" id="symptoms" name="symptoms" rows="5" maxlength="500" placeholder="For example: I've been experiencing chest pain and shortness of breath for the past 3 days, especially when climbing stairs..." required></textarea>
+                        <div class="mb-4">
+                            <label for="symptoms" class="form-label fw-bold">Describe Your Symptoms <small class="text-muted">(Be as detailed as possible)</small></label>
+                            <textarea class="form-control" id="symptoms" name="symptoms" rows="6" maxlength="500" placeholder="For example: I've been experiencing chest pain and shortness of breath for the past 3 days, especially when climbing stairs..." required></textarea>
                             <div class="text-end mt-1">
                                 <small id="char-counter" class="text-muted">0/500</small>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-info-circle fa-2x"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Your personal details will only be collected after you select a specialist. For now, just let us know about your symptoms.</p>
+                                </div>
                             </div>
                         </div>
                         

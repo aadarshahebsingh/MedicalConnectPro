@@ -16,24 +16,11 @@ def index():
 @app.route('/patient', methods=['GET', 'POST'])
 def patient_dashboard():
     if request.method == 'POST':
-        # Collect patient data
-        name = request.form.get('name')
-        age = request.form.get('age')
-        gender = request.form.get('gender')
+        # Only collect symptoms at this stage
         symptoms = request.form.get('symptoms')
-        contact = request.form.get('contact')
         
-        # Create new patient record in database
-        new_patient = Patient(
-            name=name,
-            age=age,
-            gender=gender,
-            symptoms=symptoms,
-            contact=contact
-        )
-        
-        db.session.add(new_patient)
-        db.session.commit()
+        # Store symptoms in session for later use when creating patient record
+        session['symptoms'] = symptoms
         
         # Get symptom mappings from database
         symptom_mappings = {m.symptom: m.specialist for m in SymptomMapping.query.all()}
@@ -41,8 +28,7 @@ def patient_dashboard():
         # Determine specialist based on symptoms
         specialist = match_symptoms_to_specialist(symptoms, symptom_mappings)
         
-        # Store patient ID and specialist in session
-        session['patient_id'] = new_patient.id
+        # Store specialist in session
         session['specialist'] = specialist
         
         # Update specialty statistics
@@ -60,16 +46,10 @@ def patient_dashboard():
 @app.route('/recommended-doctors')
 def recommended_doctors():
     specialist = session.get('specialist')
-    patient_id = session.get('patient_id')
+    symptoms = session.get('symptoms')
     
-    if not patient_id:
-        flash('Please enter your symptoms first', 'warning')
-        return redirect(url_for('patient_dashboard'))
-    
-    # Get the patient from the database
-    patient = Patient.query.get(patient_id)
-    if not patient:
-        flash('Patient record not found', 'error')
+    if not specialist or not symptoms:
+        flash('Please describe your symptoms first', 'warning')
         return redirect(url_for('patient_dashboard'))
     
     # Get doctors from the database based on specialization
@@ -78,7 +58,7 @@ def recommended_doctors():
     return render_template('recommended_doctors.html', 
                            doctors=doctors, 
                            specialist=specialist, 
-                           symptoms=patient.symptoms)
+                           symptoms=symptoms)
 
 # Doctor profile route
 @app.route('/doctor/<int:doctor_id>')
@@ -86,49 +66,74 @@ def doctor_profile(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
     return render_template('doctor_profile.html', doctor=doctor)
 
-# Select doctor route
-@app.route('/select-doctor/<int:doctor_id>', methods=['POST'])
+# Select doctor route - GET: Display form, POST: Process booking
+@app.route('/select-doctor/<int:doctor_id>', methods=['GET', 'POST'])
 def select_doctor(doctor_id):
-    patient_id = session.get('patient_id')
+    doctor = Doctor.query.get_or_404(doctor_id)
+    symptoms = session.get('symptoms')
+    specialist = session.get('specialist')
     
-    if not patient_id:
-        flash('Patient session expired. Please try again.', 'error')
+    if not symptoms or not specialist:
+        flash('Session expired. Please describe your symptoms again.', 'warning')
         return redirect(url_for('patient_dashboard'))
     
-    patient = Patient.query.get(patient_id)
-    doctor = Doctor.query.get(doctor_id)
+    if request.method == 'GET':
+        return render_template('patient_details.html', doctor=doctor, specialist=specialist)
     
-    if not patient or not doctor:
-        flash('Patient or doctor record not found', 'error')
-        return redirect(url_for('patient_dashboard'))
-    
-    # Associate patient with doctor
-    if doctor not in patient.doctors:
-        patient.doctors.append(doctor)
-    
-    # Create appointment
-    appointment = Appointment(
-        patient_id=patient.id,
-        doctor_id=doctor.id,
-        date=datetime.datetime.now(),
-        status='scheduled'
-    )
-    
-    # Create patient history entry
-    history_entry = PatientHistory(
-        patient_id=patient.id,
-        doctor_id=doctor.id,
-        doctor_name=doctor.name,
-        specialization=doctor.specialization,
-        status='scheduled'
-    )
-    
-    db.session.add(appointment)
-    db.session.add(history_entry)
-    db.session.commit()
-    
-    flash(f'You have successfully selected Dr. {doctor.name}', 'success')
-    return redirect(url_for('patient_history'))
+    # Process POST request - collect patient details and create records
+    if request.method == 'POST':
+        # Get patient details from form
+        name = request.form.get('name')
+        age = request.form.get('age')
+        gender = request.form.get('gender')
+        contact = request.form.get('contact')
+        
+        # Validate required fields
+        if not all([name, age, gender, contact]):
+            flash('All fields are required', 'error')
+            return render_template('patient_details.html', doctor=doctor, specialist=specialist)
+        
+        # Create new patient record
+        new_patient = Patient(
+            name=name,
+            age=age,
+            gender=gender,
+            symptoms=symptoms,
+            contact=contact
+        )
+        
+        db.session.add(new_patient)
+        db.session.commit()
+        
+        # Store patient ID in session
+        session['patient_id'] = new_patient.id
+        
+        # Associate patient with doctor
+        new_patient.doctors.append(doctor)
+        
+        # Create appointment
+        appointment = Appointment(
+            patient_id=new_patient.id,
+            doctor_id=doctor.id,
+            date=datetime.datetime.now(),
+            status='scheduled'
+        )
+        
+        # Create patient history entry
+        history_entry = PatientHistory(
+            patient_id=new_patient.id,
+            doctor_id=doctor.id,
+            doctor_name=doctor.name,
+            specialization=doctor.specialization,
+            status='scheduled'
+        )
+        
+        db.session.add(appointment)
+        db.session.add(history_entry)
+        db.session.commit()
+        
+        flash(f'You have successfully booked an appointment with Dr. {doctor.name}', 'success')
+        return redirect(url_for('patient_history'))
 
 # Patient history route
 @app.route('/patient/history')

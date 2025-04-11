@@ -71,11 +71,9 @@
                         </div>
                     </div>
                     
-                    <form action="{{ url_for('select_doctor', doctor_id=doctor.id) }}" method="POST">
-                        <button type="submit" class="btn btn-primary btn-lg w-100 pulse">
-                            <i class="fas fa-calendar-check me-2"></i>Select This Doctor
-                        </button>
-                    </form>
+                    <a href="{{ url_for('select_doctor', doctor_id=doctor.id) }}" class="btn btn-primary btn-lg w-100 pulse">
+                        <i class="fas fa-calendar-check me-2"></i>Select This Doctor
+                    </a>
                 </div>
             </div>
         </div>
@@ -163,11 +161,9 @@
                         <a href="{{ url_for('recommended_doctors') }}" class="btn btn-secondary me-2">
                             <i class="fas fa-arrow-left me-2"></i>Back to List
                         </a>
-                        <form action="{{ url_for('select_doctor', doctor_id=doctor.id) }}" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-info">
-                                <i class="fas fa-check-circle me-2"></i>Select This Doctor
-                            </button>
-                        </form>
+                        <a href="{{ url_for('select_doctor', doctor_id=doctor.id) }}" class="btn btn-info">
+                            <i class="fas fa-check-circle me-2"></i>Select This Doctor
+                        </a>
                     </div>
                 </div>
             </div>

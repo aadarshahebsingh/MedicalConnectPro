@@ -1,47 +1,92 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ doctor.name }} - Doctor Profile{% endblock %}
+{% block title %}Dr. {{ doctor.name }} - Doctor Profile{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 animate-fadeInUp" style="animation-delay: 0.1s;">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('recommended_doctors') }}">Recommended Doctors</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Doctor Profile</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
     <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <div class="card">
-                <div class="card-header bg-dark">
-                    <h2 class="text-center mb-0">
-                        <i class="fas fa-user-md me-2 text-info"></i>
-                        Doctor Profile
-                    </h2>
+        <div class="col-lg-4 animate-fadeInUp" style="animation-delay: 0.2s;">
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-body text-center p-4">
+                    <div class="doctor-profile-avatar mx-auto mb-4">
+                        <div class="doctor-avatar-bg rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; margin: 0 auto; background: linear-gradient(45deg, var(--secondary-accent), var(--primary-accent));">
+                            <i class="fas fa-user-md fa-4x text-white"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-1">Dr. {{ doctor.name }}</h2>
+                    <div class="badge mb-3">{{ doctor.specialization }}</div>
+                    
+                    <div class="d-flex justify-content-center mb-3">
+                        <div class="rating text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-value ms-2">4.5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-info mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon-box me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                                <i class="fas fa-trophy" style="color: var(--primary-accent);"></i>
+                            </div>
+                            <div class="text-start">
+                                <small class="text-muted">Experience</small>
+                                <p class="mb-0 fw-bold">{{ doctor.experience }} years</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon-box me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                                <i class="fas fa-phone-alt" style="color: var(--primary-accent);"></i>
+                            </div>
+                            <div class="text-start">
+                                <small class="text-muted">Phone</small>
+                                <p class="mb-0 fw-bold">{{ doctor.phone_number }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 210, 255, 0.1); border-radius: 8px;">
+                                <i class="fas fa-envelope" style="color: var(--primary-accent);"></i>
+                            </div>
+                            <div class="text-start">
+                                <small class="text-muted">Email</small>
+                                <p class="mb-0 fw-bold">{{ doctor.contact }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form action="{{ url_for('select_doctor', doctor_id=doctor.id) }}" method="POST">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 pulse">
+                            <i class="fas fa-calendar-check me-2"></i>Select This Doctor
+                        </button>
+                    </form>
                 </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-user-md fa-6x text-info mb-3"></i>
-                        <h2>{{ doctor.name }}</h2>
-                        <p class="lead">{{ doctor.specialization }}</p>
-                    </div>
+            </div>
+        </div>
                     
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h5><i class="fas fa-calendar-alt me-2 text-info"></i>Experience</h5>
-                            <p>{{ doctor.experience }} years of clinical practice</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h5><i class="fas fa-phone me-2 text-info"></i>Contact</h5>
-                            <p>{{ doctor.phone_number }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h5><i class="fas fa-envelope me-2 text-info"></i>Email</h5>
-                        <p>{{ doctor.contact }}</p>
-                    </div>
-                    
-                    <hr>
-                    
-                    <div class="mb-4">
-                        <h5>About {{ doctor.name }}</h5>
-                        <p>Dr. {{ doctor.name.split()[-1] }} is a highly qualified {{ doctor.specialization.lower() }} with {{ doctor.experience }} years of experience in diagnosing and treating patients. They specialize in providing comprehensive care and personalized treatment plans.</p>
-                    </div>
+        <div class="col-lg-8 animate-fadeInUp" style="animation-delay: 0.3s;">
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+                    <h3 class="fw-bold mb-0">About Dr. {{ doctor.name.split()[-1] }}</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="lead">Dr. {{ doctor.name.split()[-1] }} is a highly qualified {{ doctor.specialization.lower() }} with {{ doctor.experience }} years of experience in diagnosing and treating patients. They specialize in providing comprehensive care and personalized treatment plans.</p>
                     
                     <div class="mb-4">
                         <h5>Specialties & Expertise</h5>

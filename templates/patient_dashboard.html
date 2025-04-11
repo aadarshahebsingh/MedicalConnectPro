@@ -3,17 +3,17 @@
 {% block title %}Describe Your Symptoms - MediConnect{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 animate-fadeInUp" style="animation-delay: 0.1s;">
     <div class="row">
         <div class="col-lg-8 offset-lg-2">
-            <div class="card">
-                <div class="card-header bg-dark">
-                    <h2 class="text-center mb-0">
-                        <i class="fas fa-notes-medical me-2 text-info"></i>
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h2 class="text-center mb-0 fw-bold">
+                        <i class="fas fa-notes-medical me-2"></i>
                         Describe Your Symptoms
                     </h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <p class="lead text-center mb-4">Tell us about your symptoms so we can connect you with the right medical specialist.</p>
                     
                     <form action="{{ url_for('patient_dashboard') }}" method="POST" class="symptom-form">

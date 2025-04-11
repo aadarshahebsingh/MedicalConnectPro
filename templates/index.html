@@ -1,50 +1,56 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- Hero Section -->
+<!-- Hero Section with Animated Text -->
 <section class="hero-section">
     <div class="container text-center">
-        <h1 class="display-4 mb-3">Find the Right Doctor for Your Needs</h1>
-        <p class="lead mb-4">Connect with specialized healthcare professionals based on your symptoms</p>
-        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-info btn-lg">Get Started</a>
+        <div class="animate-fadeInUp" style="animation-delay: 0.1s;">
+            <h1 class="display-3 fw-bold mb-4">Your Health Journey <span style="color: var(--primary-accent);">Starts Here</span></h1>
+            <p class="lead fs-4 mb-5">Connect with the right specialists based on your unique symptoms</p>
+            <a href="{{ url_for('patient_dashboard') }}" class="btn btn-primary btn-lg pulse px-5 py-3">
+                <i class="fas fa-stethoscope me-2"></i>Find Your Doctor Now
+            </a>
+        </div>
     </div>
 </section>
 
-<!-- Features Section -->
+<!-- Features Section with Enhanced Cards -->
 <section class="py-5">
     <div class="container">
-        <h2 class="text-center mb-5">How MediConnect Works</h2>
+        <h2 class="text-center display-5 fw-bold mb-2">How MediConnect Works</h2>
+        <p class="text-center text-muted mb-5">Three simple steps to get the medical care you need</p>
+        
         <div class="row g-4">
-            <div class="col-md-4">
+            <div class="col-md-4 animate-fadeInUp" style="animation-delay: 0.2s;">
                 <div class="card h-100 feature-card">
-                    <div class="card-body text-center">
+                    <div class="card-body text-center p-4">
                         <div class="feature-icon">
                             <i class="fas fa-notes-medical"></i>
                         </div>
-                        <h3>Describe Your Symptoms</h3>
-                        <p>Tell us what you're experiencing and our system will analyze your symptoms.</p>
+                        <h3 class="fw-bold mb-3">Describe Your Symptoms</h3>
+                        <p class="mb-0">Share what you're experiencing, and our intelligent system will analyze your symptoms to determine the best medical specialty for your needs.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 animate-fadeInUp" style="animation-delay: 0.4s;">
                 <div class="card h-100 feature-card">
-                    <div class="card-body text-center">
+                    <div class="card-body text-center p-4">
                         <div class="feature-icon">
                             <i class="fas fa-user-md"></i>
                         </div>
-                        <h3>Find Specialists</h3>
-                        <p>We'll match you with doctors specialized in treating your specific condition.</p>
+                        <h3 class="fw-bold mb-3">Match with Specialists</h3>
+                        <p class="mb-0">Get instantly matched with qualified healthcare professionals who specialize in treating your specific condition.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 animate-fadeInUp" style="animation-delay: 0.6s;">
                 <div class="card h-100 feature-card">
-                    <div class="card-body text-center">
+                    <div class="card-body text-center p-4">
                         <div class="feature-icon">
                             <i class="fas fa-calendar-check"></i>
                         </div>
-                        <h3>Connect Instantly</h3>
-                        <p>Choose your preferred doctor and get connected for expert medical consultation.</p>
+                        <h3 class="fw-bold mb-3">Connect & Consult</h3>
+                        <p class="mb-0">Choose your preferred doctor and get connected for expert medical consultation, with full access to your medical history.</p>
                     </div>
                 </div>
             </div>
@@ -52,96 +58,56 @@
     </div>
 </section>
 
-<!-- Specialties Section -->
+<!-- Statistics Section -->
 <section class="py-5 bg-dark">
-    <div class="container">
-        <h2 class="text-center mb-5">Medical Specialties</h2>
+    <div class="container text-center">
+        <h2 class="text-center display-6 fw-bold mb-5">Trusted by Thousands</h2>
+        
         <div class="row g-4">
             <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-heartbeat mb-3 text-info fa-2x"></i>
-                        <h5>Cardiology</h5>
-                    </div>
+                <div class="stat-item animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="display-4 fw-bold mb-2" style="color: var(--primary-accent);">15+</div>
+                    <p class="mb-0">Medical Specialties</p>
                 </div>
             </div>
             <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-brain mb-3 text-info fa-2x"></i>
-                        <h5>Neurology</h5>
-                    </div>
+                <div class="stat-item animate-fadeInUp" style="animation-delay: 0.3s;">
+                    <div class="display-4 fw-bold mb-2" style="color: var(--primary-accent);">100+</div>
+                    <p class="mb-0">Expert Doctors</p>
                 </div>
             </div>
             <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-bone mb-3 text-info fa-2x"></i>
-                        <h5>Orthopedics</h5>
-                    </div>
+                <div class="stat-item animate-fadeInUp" style="animation-delay: 0.4s;">
+                    <div class="display-4 fw-bold mb-2" style="color: var(--primary-accent);">50+</div>
+                    <p class="mb-0">Symptom Matches</p>
                 </div>
             </div>
             <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-lungs mb-3 text-info fa-2x"></i>
-                        <h5>Pulmonology</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-baby mb-3 text-info fa-2x"></i>
-                        <h5>Pediatrics</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-venus mb-3 text-info fa-2x"></i>
-                        <h5>Gynecology</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-eye mb-3 text-info fa-2x"></i>
-                        <h5>Ophthalmology</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card h-100 speciality-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-stomach mb-3 text-info fa-2x"></i>
-                        <h5>Gastroenterology</h5>
-                    </div>
+                <div class="stat-item animate-fadeInUp" style="animation-delay: 0.5s;">
+                    <div class="display-4 fw-bold mb-2" style="color: var(--primary-accent);">24/7</div>
+                    <p class="mb-0">Service Available</p>
                 </div>
             </div>
         </div>
-        <div class="text-center mt-4">
-            <a href="{{ url_for('patient_dashboard') }}" class="btn btn-outline-info btn-lg">Find Your Specialist</a>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 animate-fadeInUp" style="animation-delay: 0.2s;">
+                <h2 class="display-5 fw-bold mb-4">Ready to find your perfect doctor match?</h2>
+                <p class="lead mb-4">Our intelligent symptom matching system connects you with the right specialists in seconds.</p>
+                <a href="{{ url_for('patient_dashboard') }}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-user-plus me-2"></i>Start Now
+                </a>
+            </div>
+            <div class="col-lg-6 animate-fadeInUp text-center" style="animation-delay: 0.4s;">
+                <img src="https://cdn.pixabay.com/photo/2020/11/03/15/32/doctor-5710160_1280.jpg" alt="Doctor with patient" class="img-fluid rounded-3 shadow-lg" style="max-height: 350px;">
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Call to Action -->
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 offset-lg-2">
-                <div class="card bg-dark">
-                    <div class="card-body p-5 text-center">
-                        <h2 class="mb-3">Ready to find the right medical care?</h2>
-                        <p class="lead mb-4">Our intelligent system matches your symptoms with the most appropriate medical specialists.</p>
-                        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-info btn-lg">Start Now</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}

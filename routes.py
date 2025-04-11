@@ -1,11 +1,11 @@
-import uuid
 import datetime
 from flask import render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
-from werkzeug.security import check_password_hash
-from app import app, app_data, doctors_df
-from models import User, Patient, Appointment
+from werkzeug.security import check_password_hash, generate_password_hash
+from app import app, doctors_df, db
+from models import User, Doctor, Patient, Appointment, PatientHistory, SpecialtyStatistics, SymptomMapping
 from utils import match_symptoms_to_specialist
+from sqlalchemy import func
 
 # Home/Index route
 @app.route('/')
@@ -16,9 +16,6 @@ def index():
 @app.route('/patient', methods=['GET', 'POST'])
 def patient_dashboard():
     if request.method == 'POST':
-        # Generate a unique ID for the patient
-        patient_id = str(uuid.uuid4())
-        
         # Collect patient data
         name = request.form.get('name')
         age = request.form.get('age')
@@ -26,112 +23,111 @@ def patient_dashboard():
         symptoms = request.form.get('symptoms')
         contact = request.form.get('contact')
         
-        # Create new patient record
-        new_patient = {
-            'id': patient_id,
-            'name': name,
-            'age': age,
-            'gender': gender,
-            'symptoms': symptoms,
-            'contact': contact,
-            'assigned_doctor': None,
-            'history': []
-        }
+        # Create new patient record in database
+        new_patient = Patient(
+            name=name,
+            age=age,
+            gender=gender,
+            symptoms=symptoms,
+            contact=contact
+        )
         
-        # Store patient data
-        app_data['patients'][patient_id] = new_patient
+        db.session.add(new_patient)
+        db.session.commit()
         
-        # Store patient ID in session
-        session['patient_id'] = patient_id
+        # Get symptom mappings from database
+        symptom_mappings = {m.symptom: m.specialist for m in SymptomMapping.query.all()}
         
         # Determine specialist based on symptoms
-        specialist = match_symptoms_to_specialist(symptoms, app_data['symptom_to_specialist'])
+        specialist = match_symptoms_to_specialist(symptoms, symptom_mappings)
         
-        # Filter doctors by specialization
-        recommended_doctors = doctors_df[doctors_df['specialization'] == specialist]
-        
-        if recommended_doctors.empty:
-            flash('No matching specialists found for your symptoms. Please try with different symptoms.', 'warning')
-            return redirect(url_for('patient_dashboard'))
-        
-        # Convert to dictionary for template
-        doctors_list = recommended_doctors.to_dict('records')
+        # Store patient ID and specialist in session
+        session['patient_id'] = new_patient.id
+        session['specialist'] = specialist
         
         # Update specialty statistics
-        app_data['specialty_stats'][specialist] += 1
+        specialty_stat = SpecialtyStatistics.query.filter_by(specialty=specialist).first()
+        if specialty_stat:
+            specialty_stat.count += 1
+            db.session.commit()
         
-        return render_template('recommended_doctors.html', 
-                               doctors=doctors_list, 
-                               specialist=specialist, 
-                               symptoms=symptoms)
+        # Redirect to recommended doctors page
+        return redirect(url_for('recommended_doctors'))
     
     return render_template('patient_dashboard.html')
 
-# Doctor profile route
-@app.route('/doctor/<doctor_id>')
-def doctor_profile(doctor_id):
-    doctor = None
-    for _, row in doctors_df.iterrows():
-        if str(row['id']) == doctor_id:
-            doctor = row.to_dict()
-            break
+# Recommended doctors route
+@app.route('/recommended-doctors')
+def recommended_doctors():
+    specialist = session.get('specialist')
+    patient_id = session.get('patient_id')
     
-    if not doctor:
-        flash('Doctor not found', 'error')
+    if not patient_id:
+        flash('Please enter your symptoms first', 'warning')
         return redirect(url_for('patient_dashboard'))
     
+    # Get the patient from the database
+    patient = Patient.query.get(patient_id)
+    if not patient:
+        flash('Patient record not found', 'error')
+        return redirect(url_for('patient_dashboard'))
+    
+    # Get doctors from the database based on specialization
+    doctors = Doctor.query.filter_by(specialization=specialist).all()
+    
+    return render_template('recommended_doctors.html', 
+                           doctors=doctors, 
+                           specialist=specialist, 
+                           symptoms=patient.symptoms)
+
+# Doctor profile route
+@app.route('/doctor/<int:doctor_id>')
+def doctor_profile(doctor_id):
+    doctor = Doctor.query.get_or_404(doctor_id)
     return render_template('doctor_profile.html', doctor=doctor)
 
 # Select doctor route
-@app.route('/select_doctor/<doctor_id>', methods=['POST'])
+@app.route('/select-doctor/<int:doctor_id>', methods=['POST'])
 def select_doctor(doctor_id):
     patient_id = session.get('patient_id')
     
-    if not patient_id or patient_id not in app_data['patients']:
-        flash('Patient session expired or invalid', 'error')
+    if not patient_id:
+        flash('Patient session expired. Please try again.', 'error')
         return redirect(url_for('patient_dashboard'))
     
-    # Get doctor and patient data
-    doctor = None
-    for _, row in doctors_df.iterrows():
-        if str(row['id']) == doctor_id:
-            doctor = row.to_dict()
-            break
+    patient = Patient.query.get(patient_id)
+    doctor = Doctor.query.get(doctor_id)
     
-    if not doctor:
-        flash('Doctor not found', 'error')
+    if not patient or not doctor:
+        flash('Patient or doctor record not found', 'error')
         return redirect(url_for('patient_dashboard'))
     
-    # Assign doctor to patient
-    patient = app_data['patients'][patient_id]
-    patient['assigned_doctor'] = doctor_id
+    # Associate patient with doctor
+    if doctor not in patient.doctors:
+        patient.doctors.append(doctor)
     
-    # Add patient to doctor's list
-    if doctor_id in app_data['doctors']:
-        app_data['doctors'][doctor_id]['patients'].append(patient_id)
+    # Create appointment
+    appointment = Appointment(
+        patient_id=patient.id,
+        doctor_id=doctor.id,
+        date=datetime.datetime.now(),
+        status='scheduled'
+    )
     
-    # Create an appointment
-    appointment_id = str(uuid.uuid4())
-    new_appointment = {
-        'id': appointment_id,
-        'patient_id': patient_id,
-        'doctor_id': doctor_id,
-        'date': datetime.datetime.now().strftime('%Y-%m-%d'),
-        'status': 'scheduled',
-        'notes': ''
-    }
+    # Create patient history entry
+    history_entry = PatientHistory(
+        patient_id=patient.id,
+        doctor_id=doctor.id,
+        doctor_name=doctor.name,
+        specialization=doctor.specialization,
+        status='scheduled'
+    )
     
-    app_data['appointments'].append(new_appointment)
+    db.session.add(appointment)
+    db.session.add(history_entry)
+    db.session.commit()
     
-    # Add to patient history
-    patient['history'].append({
-        'date': datetime.datetime.now().strftime('%Y-%m-%d'),
-        'doctor': doctor['name'],
-        'specialization': doctor['specialization'],
-        'status': 'Consultation scheduled'
-    })
-    
-    flash(f'You have successfully selected {doctor["name"]} as your doctor', 'success')
+    flash(f'You have successfully selected Dr. {doctor.name}', 'success')
     return redirect(url_for('patient_history'))
 
 # Patient history route
@@ -139,24 +135,28 @@ def select_doctor(doctor_id):
 def patient_history():
     patient_id = session.get('patient_id')
     
-    if not patient_id or patient_id not in app_data['patients']:
-        flash('Patient session expired or invalid', 'error')
+    if not patient_id:
+        flash('Please complete your profile first', 'warning')
         return redirect(url_for('patient_dashboard'))
     
-    patient = app_data['patients'][patient_id]
+    patient = Patient.query.get(patient_id)
     
-    # Get assigned doctor details
-    assigned_doctor = None
-    if patient['assigned_doctor']:
-        doctor_id = patient['assigned_doctor']
-        for _, row in doctors_df.iterrows():
-            if str(row['id']) == doctor_id:
-                assigned_doctor = row.to_dict()
-                break
+    if not patient:
+        flash('Patient record not found', 'error')
+        return redirect(url_for('patient_dashboard'))
+    
+    # Get the current doctor (most recent)
+    doctor = None
+    if patient.doctors:
+        doctor = patient.doctors[-1]
+    
+    # Get patient history entries sorted by date
+    history = PatientHistory.query.filter_by(patient_id=patient.id).order_by(PatientHistory.date.desc()).all()
     
     return render_template('patient_history.html', 
                            patient=patient, 
-                           doctor=assigned_doctor)
+                           doctor=doctor, 
+                           history=history)
 
 # Doctor login route
 @app.route('/doctor/login', methods=['GET', 'POST'])
@@ -165,15 +165,31 @@ def doctor_login():
         doctor_id = request.form.get('doctor_id')
         password = request.form.get('password')
         
-        if doctor_id in app_data['users'] and app_data['users'][doctor_id]['role'] == 'doctor':
-            # In a real app, we would use proper password hashing
-            if app_data['users'][doctor_id]['password'] == password:
-                user = User(
-                    id=doctor_id,
-                    username=app_data['users'][doctor_id]['username'],
-                    role='doctor'
-                )
+        # Find doctor in database
+        doctor = Doctor.query.get(doctor_id)
+        
+        if doctor:
+            # In a real application, we would check a hashed password
+            # For now, we use a simple pattern of ID + "123"
+            expected_password = f"{doctor_id}123"
+            
+            if password == expected_password:
+                # Create a User object for Flask-Login
+                user = User.query.filter_by(username=f"doctor_{doctor_id}").first()
+                
+                # If user doesn't exist, create it
+                if not user:
+                    user = User(
+                        username=f"doctor_{doctor_id}",
+                        password_hash=generate_password_hash(expected_password),
+                        role='doctor'
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                
                 login_user(user)
+                session['doctor_id'] = doctor_id
+                flash(f'Welcome, Dr. {doctor.name}', 'success')
                 return redirect(url_for('doctor_dashboard'))
             else:
                 flash('Invalid password', 'error')
@@ -186,31 +202,28 @@ def doctor_login():
 @app.route('/doctor/dashboard')
 @login_required
 def doctor_dashboard():
-    if current_user.role != 'doctor':
-        flash('Access denied: Doctor privileges required', 'error')
-        return redirect(url_for('index'))
+    doctor_id = session.get('doctor_id')
     
-    doctor_id = current_user.id
-    doctor = app_data['doctors'].get(doctor_id)
+    if not doctor_id:
+        flash('Please log in first', 'warning')
+        return redirect(url_for('doctor_login'))
+    
+    doctor = Doctor.query.get(doctor_id)
     
     if not doctor:
-        flash('Doctor profile not found', 'error')
-        return redirect(url_for('index'))
+        flash('Doctor record not found', 'error')
+        return redirect(url_for('doctor_login'))
     
-    # Get patients assigned to this doctor
-    assigned_patients = []
-    for patient_id in doctor['patients']:
-        if patient_id in app_data['patients']:
-            assigned_patients.append(app_data['patients'][patient_id])
+    # Get all patients associated with this doctor
+    patients = doctor.patients
     
-    # Get appointments for this doctor
-    doctor_appointments = [apt for apt in app_data['appointments'] 
-                         if apt['doctor_id'] == doctor_id]
+    # Get all appointments for this doctor
+    appointments = Appointment.query.filter_by(doctor_id=doctor.id).all()
     
     return render_template('doctor_dashboard.html', 
                            doctor=doctor, 
-                           patients=assigned_patients,
-                           appointments=doctor_appointments)
+                           patients=patients, 
+                           appointments=appointments)
 
 # Admin login route
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -219,20 +232,15 @@ def admin_login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        if username in app_data['users'] and app_data['users'][username]['role'] == 'admin':
-            # In a real app, we would use proper password hashing
-            if app_data['users'][username]['password'] == password:
-                user = User(
-                    id=username,
-                    username=username,
-                    role='admin'
-                )
-                login_user(user)
-                return redirect(url_for('admin_dashboard'))
-            else:
-                flash('Invalid password', 'error')
+        # Find admin user in database
+        user = User.query.filter_by(username=username, role='admin').first()
+        
+        if user and check_password_hash(user.password_hash, password):
+            login_user(user)
+            flash('Welcome, Admin', 'success')
+            return redirect(url_for('admin_dashboard'))
         else:
-            flash('Admin username not found', 'error')
+            flash('Invalid admin credentials', 'error')
     
     return render_template('admin_login.html')
 
@@ -240,30 +248,28 @@ def admin_login():
 @app.route('/admin/dashboard')
 @login_required
 def admin_dashboard():
-    if current_user.role != 'admin':
-        flash('Access denied: Admin privileges required', 'error')
-        return redirect(url_for('index'))
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Admin access required', 'error')
+        return redirect(url_for('admin_login'))
     
-    # Get specialty statistics for the admin dashboard
-    specialty_stats = app_data['specialty_stats']
+    # Get statistics from database
+    total_patients = Patient.query.count()
+    total_appointments = Appointment.query.count()
     
-    # Get total patients
-    total_patients = len(app_data['patients'])
+    # Get specialty statistics
+    specialty_stats = {stat.specialty: stat.count for stat in SpecialtyStatistics.query.all()}
     
-    # Get total appointments
-    total_appointments = len(app_data['appointments'])
-    
-    # Get appointment status breakdown
+    # Get appointment status statistics
     appointment_stats = {
-        'scheduled': len([a for a in app_data['appointments'] if a['status'] == 'scheduled']),
-        'completed': len([a for a in app_data['appointments'] if a['status'] == 'completed']),
-        'cancelled': len([a for a in app_data['appointments'] if a['status'] == 'cancelled'])
+        'scheduled': Appointment.query.filter_by(status='scheduled').count(),
+        'completed': Appointment.query.filter_by(status='completed').count(),
+        'cancelled': Appointment.query.filter_by(status='cancelled').count()
     }
     
     return render_template('admin_dashboard.html', 
-                           specialty_stats=specialty_stats,
                            total_patients=total_patients,
                            total_appointments=total_appointments,
+                           specialty_stats=specialty_stats,
                            appointment_stats=appointment_stats)
 
 # Logout route
@@ -271,53 +277,41 @@ def admin_dashboard():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     flash('You have been logged out', 'info')
     return redirect(url_for('index'))
 
 # Update appointment status route
-@app.route('/update_appointment/<appointment_id>', methods=['POST'])
+@app.route('/appointment/<int:appointment_id>/update', methods=['POST'])
 @login_required
 def update_appointment(appointment_id):
-    if current_user.role != 'doctor':
-        flash('Access denied: Doctor privileges required', 'error')
-        return redirect(url_for('index'))
+    appointment = Appointment.query.get_or_404(appointment_id)
     
-    # Find the appointment
-    appointment = None
-    for apt in app_data['appointments']:
-        if apt['id'] == appointment_id:
-            appointment = apt
-            break
-    
-    if not appointment:
-        flash('Appointment not found', 'error')
+    # Check if user is the doctor for this appointment
+    if current_user.role != 'admin' and str(appointment.doctor_id) != session.get('doctor_id'):
+        flash('Unauthorized access', 'error')
         return redirect(url_for('doctor_dashboard'))
     
-    # Update status
     new_status = request.form.get('status')
-    notes = request.form.get('notes', '')
     
-    appointment['status'] = new_status
-    appointment['notes'] = notes
-    
-    # Update patient history
-    patient_id = appointment['patient_id']
-    if patient_id in app_data['patients']:
-        patient = app_data['patients'][patient_id]
+    if new_status in ['scheduled', 'completed', 'cancelled']:
+        appointment.status = new_status
         
-        # Get doctor name
-        doctor_name = "Unknown Doctor"
-        doctor_id = appointment['doctor_id']
-        if doctor_id in app_data['doctors']:
-            doctor_name = app_data['doctors'][doctor_id]['name']
+        # Update corresponding history entry
+        history_entry = PatientHistory.query.filter_by(
+            patient_id=appointment.patient_id,
+            doctor_id=appointment.doctor_id
+        ).order_by(PatientHistory.date.desc()).first()
         
-        # Add to history
-        patient['history'].append({
-            'date': datetime.datetime.now().strftime('%Y-%m-%d'),
-            'doctor': doctor_name,
-            'status': f'Appointment {new_status}',
-            'notes': notes
-        })
+        if history_entry:
+            history_entry.status = new_status
+        
+        db.session.commit()
+        flash('Appointment status updated successfully', 'success')
+    else:
+        flash('Invalid status', 'error')
     
-    flash('Appointment updated successfully', 'success')
-    return redirect(url_for('doctor_dashboard'))
+    if current_user.role == 'admin':
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return redirect(url_for('doctor_dashboard'))

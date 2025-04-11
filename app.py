@@ -3,11 +3,24 @@ import pandas as pd
 from flask import Flask
 from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.security import generate_password_hash
+from db import db
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+# Configure database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize the Flask-SQLAlchemy extension
+db.init_app(app)
 
 # Initialize Login Manager
 login_manager = LoginManager()
@@ -17,20 +30,46 @@ login_manager.login_view = 'doctor_login'
 # Load doctor data from CSV
 doctors_df = pd.read_csv('attached_assets/doctors_indian_with_phone.csv')
 
-# In-memory storage for application data
-# This would be replaced with a database in production
-app_data = {
-    'users': {
-        'admin': {
-            'username': 'admin',
-            'password': 'admin123',  # This would be hashed in production
-            'role': 'admin'
-        }
-    },
-    'doctors': {},
-    'patients': {},
-    'appointments': [],
-    'symptom_to_specialist': {
+# Import models after initializing db to avoid circular imports
+from models import User, Doctor, Patient, Appointment, PatientHistory, SpecialtyStatistics, SymptomMapping
+
+# Load user function for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    # Check if user_id is numeric (database id) or username string
+    try:
+        user_id = int(user_id)
+        return User.query.get(user_id)
+    except ValueError:
+        # If it's not numeric, it might be a username
+        return User.query.filter_by(username=user_id).first()
+
+# Create database tables if they don't exist
+with app.app_context():
+    db.create_all()
+    
+    # Create admin user if not exists
+    admin = User.query.filter_by(username='admin').first()
+    if not admin:
+        admin = User(
+            username='admin',
+            password_hash=generate_password_hash('admin123'),
+            role='admin'
+        )
+        db.session.add(admin)
+        db.session.commit()
+    
+    # Initialize specialty statistics if empty
+    specialties = ['Cardiologist', 'Dermatologist', 'Neurologist', 'Orthopedic', 'Pediatrician', 
+                  'Psychiatrist', 'Oncologist', 'Gynecologist', 'Endocrinologist', 'Ophthalmologist',
+                  'ENT Specialist', 'Urologist', 'Gastroenterologist', 'Pulmonologist', 'Rheumatologist']
+    
+    for specialty in specialties:
+        if not SpecialtyStatistics.query.filter_by(specialty=specialty).first():
+            db.session.add(SpecialtyStatistics(specialty=specialty, count=0))
+    
+    # Add symptom mappings if empty
+    symptom_mappings = {
         'chest pain': 'Cardiologist',
         'heart palpitations': 'Cardiologist',
         'shortness of breath': 'Cardiologist',
@@ -100,45 +139,24 @@ app_data = {
         'lung disease': 'Pulmonologist',
         
         'joint inflammation': 'Rheumatologist',
-        'autoimmune disorders': 'Rheumatologist',
         'lupus': 'Rheumatologist',
-        'rheumatoid arthritis': 'Rheumatologist'
-    }
-}
-
-# Initialize doctor user accounts from CSV data
-for _, doctor in doctors_df.iterrows():
-    doctor_id = str(doctor['id'])
-    # Create user account entry
-    app_data['users'][doctor_id] = {
-        'username': doctor_id,
-        'password': doctor_id + '123',  # Simple default password, would be hashed in production
-        'role': 'doctor'
+        'autoimmune disorders': 'Rheumatologist'
     }
     
-    # Store doctor details
-    app_data['doctors'][doctor_id] = {
-        'id': doctor_id,
-        'name': doctor['name'],
-        'specialization': doctor['specialization'],
-        'contact': doctor['contact'],
-        'experience': doctor['experience'],
-        'phone_number': doctor['phone_number'],
-        'patients': []  # Track patients for this doctor
-    }
-
-# Specialty statistics counters
-app_data['specialty_stats'] = {spec: 0 for spec in doctors_df['specialization'].unique()}
-
-from models import User
-
-@login_manager.user_loader
-def load_user(user_id):
-    if user_id in app_data['users']:
-        user_data = app_data['users'][user_id]
-        return User(
-            id=user_id,
-            username=user_data['username'],
-            role=user_data['role']
-        )
-    return None
+    for symptom, specialist in symptom_mappings.items():
+        if not SymptomMapping.query.filter_by(symptom=symptom).first():
+            db.session.add(SymptomMapping(symptom=symptom, specialist=specialist))
+    
+    # Import doctors from CSV if no doctors exist in database
+    if Doctor.query.count() == 0:
+        for _, row in doctors_df.iterrows():
+            doctor = Doctor(
+                name=row['name'],
+                specialization=row['specialization'],
+                experience=row['experience'],
+                phone_number=row['phone_number'],
+                contact=f"{row['name'].lower().replace(' ', '.')}@mediconnect.com"
+            )
+            db.session.add(doctor)
+    
+    db.session.commit()

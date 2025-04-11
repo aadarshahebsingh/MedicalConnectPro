@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Medicine Analyzer - MediConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5 animate-fadeInUp" style="animation-delay: 0.1s;">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Medicine Analyzer</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header">
+                    <h2 class="text-center mb-0 fw-bold">
+                        <i class="fas fa-pills me-2"></i>
+                        Medicine Analyzer
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="medicine-icon mb-3" style="font-size: 5rem; color: var(--primary-accent);">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                        <h3 class="fw-bold">Find Generic Alternatives</h3>
+                        <p class="lead">Upload a photo of your medicine to find cheaper generic alternatives</p>
+                    </div>
+                    
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5>How it works</h5>
+                                <p>Our AI-powered tool analyzes images of medicine packages or pills and suggests generic alternatives that have the same active ingredients but cost significantly less.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <a href="javascript:void(0)" onclick="launchStreamlit()" class="btn btn-primary btn-lg pulse">
+                            <i class="fas fa-camera me-2"></i>Launch Medicine Analyzer
+                        </a>
+                    </div>
+                    
+                    <div class="row mt-5">
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <h5 class="fw-bold">Snap a Photo</h5>
+                            <p>Take a clear photo of your medicine package or pill</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h5 class="fw-bold">Get Alternatives</h5>
+                            <p>Our AI identifies cheaper generic alternatives</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <h5 class="fw-bold">Translate Results</h5>
+                            <p>View results in multiple Indian languages</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning mt-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5>Important Note</h5>
+                        <p class="mb-0">Always consult with a healthcare professional before making changes to your medication. This tool is for informational purposes only and does not constitute medical advice.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for displaying Streamlit app -->
+<div class="modal fade" id="streamlitModal" tabindex="-1" aria-labelledby="streamlitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="streamlitModalLabel">Medicine Analyzer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="height: 80vh;">
+                <iframe id="streamlitFrame" src="" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function launchStreamlit() {
+    // In a real environment, this would be the actual Streamlit URL
+    // For demonstration, we'll show a message explaining how to run it
+    const streamlitUrl = "/streamlit-medicine-analyzer";
+    document.getElementById('streamlitFrame').src = streamlitUrl;
+    
+    // Show modal
+    var myModal = new bootstrap.Modal(document.getElementById('streamlitModal'), {
+        keyboard: false
+    });
+    myModal.show();
+    
+    // Alternatively, show an alert with instructions on how to run it
+    alert("To use the Medicine Analyzer feature, you would need to run the Streamlit app separately using:\n\nstreamlit run medicine_analyzer/app.py\n\nThis would normally be integrated via an iframe or redirected to the Streamlit app.");
+}
+</script>
+{% endblock %}

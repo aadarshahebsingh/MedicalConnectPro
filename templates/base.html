@@ -32,6 +32,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('patient_dashboard') }}">Find a Doctor</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('medicine_analyzer') }}">
+                            <i class="fas fa-pills me-1"></i>Medicine Analyzer
+                        </a>
+                    </li>
                     {% if session.get('patient_id') %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('patient_history') }}">My History</a>

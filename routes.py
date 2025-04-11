@@ -272,6 +272,11 @@ def admin_dashboard():
                            specialty_stats=specialty_stats,
                            appointment_stats=appointment_stats)
 
+# Medicine analyzer route
+@app.route('/medicine-analyzer')
+def medicine_analyzer():
+    return render_template('medicine_analyzer.html')
+
 # Logout route
 @app.route('/logout')
 @login_required

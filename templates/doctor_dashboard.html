@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Dashboard - MediConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Doctor Profile -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 text-center">
+                            <i class="fas fa-user-md fa-5x text-info mb-3"></i>
+                        </div>
+                        <div class="col-md-10">
+                            <h2>Welcome, {{ doctor.name }}</h2>
+                            <p class="lead mb-2">{{ doctor.specialization }} | {{ doctor.experience }} years of experience</p>
+                            <p><i class="fas fa-phone me-2 text-info"></i>{{ doctor.phone_number }}</p>
+                            <p><i class="fas fa-envelope me-2 text-info"></i>{{ doctor.contact }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-stats text-center">
+                <i class="fas fa-users fa-3x text-info mb-2"></i>
+                <h3>{{ patients|length }}</h3>
+                <p class="mb-0">Total Patients</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stats text-center">
+                <i class="fas fa-calendar-check fa-3x text-info mb-2"></i>
+                <h3>{{ appointments|length }}</h3>
+                <p class="mb-0">Total Appointments</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stats text-center">
+                <i class="fas fa-clipboard-list fa-3x text-info mb-2"></i>
+                <h3>{{ appointments|selectattr('status', 'equalto', 'scheduled')|list|length }}</h3>
+                <p class="mb-0">Pending Appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Records and Appointments Tabs -->
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="doctorTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="patients-tab" data-bs-toggle="tab" data-bs-target="#patients" type="button" role="tab" aria-controls="patients" aria-selected="true">
+                        <i class="fas fa-users me-2"></i>My Patients
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab" aria-controls="appointments" aria-selected="false">
+                        <i class="fas fa-calendar-alt me-2"></i>Appointments
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="doctorTabsContent">
+                <!-- Patients Tab -->
+                <div class="tab-pane fade show active" id="patients" role="tabpanel" aria-labelledby="patients-tab">
+                    {% if patients %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Patient Name</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Contact</th>
+                                    <th>Symptoms</th>
+                                    <th>History</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in patients %}
+                                <tr>
+                                    <td>{{ patient.name }}</td>
+                                    <td>{{ patient.age }}</td>
+                                    <td>{{ patient.gender|capitalize }}</td>
+                                    <td>{{ patient.contact }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#symptomModal{{ patient.id }}">
+                                            View Symptoms
+                                        </button>
+                                        
+                                        <!-- Symptom Modal -->
+                                        <div class="modal fade" id="symptomModal{{ patient.id }}" tabindex="-1" aria-labelledby="symptomModalLabel{{ patient.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="symptomModalLabel{{ patient.id }}">{{ patient.name }}'s Symptoms</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>{{ patient.symptoms }}</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#historyModal{{ patient.id }}">
+                                            View History
+                                        </button>
+                                        
+                                        <!-- History Modal -->
+                                        <div class="modal fade" id="historyModal{{ patient.id }}" tabindex="-1" aria-labelledby="historyModalLabel{{ patient.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="historyModalLabel{{ patient.id }}">{{ patient.name }}'s Medical History</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        {% if patient.history %}
+                                                        <div class="history-timeline">
+                                                            {% for entry in patient.history %}
+                                                            <div class="history-item">
+                                                                <h6>{{ entry.date }}</h6>
+                                                                <p><strong>Doctor:</strong> {{ entry.doctor }}</p>
+                                                                <p><strong>Status:</strong> {{ entry.status }}</p>
+                                                                {% if entry.notes %}
+                                                                <p><strong>Notes:</strong> {{ entry.notes }}</p>
+                                                                {% endif %}
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        {% else %}
+                                                        <p class="text-center">No history records found.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-plus fa-4x text-secondary mb-3"></i>
+                        <h3>No patients yet</h3>
+                        <p class="lead">You currently don't have any assigned patients.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Appointments Tab -->
+                <div class="tab-pane fade" id="appointments" role="tabpanel" aria-labelledby="appointments-tab">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Patient Name</th>
+                                    <th>Symptoms</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.date }}</td>
+                                    <td>
+                                        {% for pid, patient in app_data['patients'].items() %}
+                                            {% if pid == appointment.patient_id %}
+                                                {{ patient.name }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for pid, patient in app_data['patients'].items() %}
+                                            {% if pid == appointment.patient_id %}
+                                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#symptomModalApt{{ appointment.id }}">
+                                                    View Symptoms
+                                                </button>
+                                                
+                                                <!-- Symptom Modal -->
+                                                <div class="modal fade" id="symptomModalApt{{ appointment.id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Patient Symptoms</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>{{ patient.symptoms }}</p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'warning' if appointment.status == 'scheduled' else 'success' if appointment.status == 'completed' else 'danger' }}">
+                                            {{ appointment.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal{{ appointment.id }}">
+                                            Update Status
+                                        </button>
+                                        
+                                        <!-- Update Modal -->
+                                        <div class="modal fade" id="updateModal{{ appointment.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Update Appointment Status</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form action="{{ url_for('update_appointment', appointment_id=appointment.id) }}" method="POST" class="appointment-status-form">
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label for="status" class="form-label">Status</label>
+                                                                <select class="form-select" id="status" name="status">
+                                                                    <option value="scheduled" {{ 'selected' if appointment.status == 'scheduled' else '' }}>Scheduled</option>
+                                                                    <option value="completed" {{ 'selected' if appointment.status == 'completed' else '' }}>Completed</option>
+                                                                    <option value="cancelled" {{ 'selected' if appointment.status == 'cancelled' else '' }}>Cancelled</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="notes" class="form-label">Notes</label>
+                                                                <textarea class="form-control" id="notes" name="notes" rows="3">{{ appointment.notes }}</textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-alt fa-4x text-secondary mb-3"></i>
+                        <h3>No appointments yet</h3>
+                        <p class="lead">You currently don't have any scheduled appointments.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

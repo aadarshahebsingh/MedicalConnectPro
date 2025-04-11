@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Describe Your Symptoms - MediConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card">
+                <div class="card-header bg-dark">
+                    <h2 class="text-center mb-0">
+                        <i class="fas fa-notes-medical me-2 text-info"></i>
+                        Describe Your Symptoms
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-center mb-4">Tell us about your symptoms so we can connect you with the right medical specialist.</p>
+                    
+                    <form action="{{ url_for('patient_dashboard') }}" method="POST" class="symptom-form">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="age" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="age" name="age" min="1" max="120" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="" selected disabled>Select gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="contact" class="form-label">Contact Number</label>
+                            <input type="tel" class="form-control" id="contact" name="contact" placeholder="+91 XXXXXXXXXX" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="symptoms" class="form-label">Describe Your Symptoms <small class="text-muted">(Be as detailed as possible)</small></label>
+                            <textarea class="form-control" id="symptoms" name="symptoms" rows="5" maxlength="500" placeholder="For example: I've been experiencing chest pain and shortness of breath for the past 3 days, especially when climbing stairs..." required></textarea>
+                            <div class="text-end mt-1">
+                                <small id="char-counter" class="text-muted">0/500</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">I understand that this is not a medical diagnosis and I should seek emergency care for serious conditions.</label>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-search-plus me-2"></i>Find Specialist
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <small class="text-muted">Your information is kept confidential and secure.</small>
+                </div>
+            </div>
+            
+            <div class="alert alert-secondary mt-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-info-circle fa-2x text-info"></i>
+                    </div>
+                    <div>
+                        <h5>How it works:</h5>
+                        <p>Our system analyzes your symptoms and matches them with the most appropriate medical specialist. This helps ensure you receive the right care for your specific health concerns.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

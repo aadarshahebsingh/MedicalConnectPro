@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ doctor.name }} - Doctor Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card">
+                <div class="card-header bg-dark">
+                    <h2 class="text-center mb-0">
+                        <i class="fas fa-user-md me-2 text-info"></i>
+                        Doctor Profile
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-md fa-6x text-info mb-3"></i>
+                        <h2>{{ doctor.name }}</h2>
+                        <p class="lead">{{ doctor.specialization }}</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-calendar-alt me-2 text-info"></i>Experience</h5>
+                            <p>{{ doctor.experience }} years of clinical practice</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-phone me-2 text-info"></i>Contact</h5>
+                            <p>{{ doctor.phone_number }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="fas fa-envelope me-2 text-info"></i>Email</h5>
+                        <p>{{ doctor.contact }}</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-4">
+                        <h5>About {{ doctor.name }}</h5>
+                        <p>Dr. {{ doctor.name.split()[-1] }} is a highly qualified {{ doctor.specialization.lower() }} with {{ doctor.experience }} years of experience in diagnosing and treating patients. They specialize in providing comprehensive care and personalized treatment plans.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Specialties & Expertise</h5>
+                        <ul>
+                            {% if doctor.specialization == 'Cardiologist' %}
+                                <li>Cardiac diagnosis and treatment</li>
+                                <li>Heart disease management</li>
+                                <li>Cardiovascular health</li>
+                            {% elif doctor.specialization == 'Dermatologist' %}
+                                <li>Skin disorders and conditions</li>
+                                <li>Cosmetic dermatology</li>
+                                <li>Dermatological surgery</li>
+                            {% elif doctor.specialization == 'Neurologist' %}
+                                <li>Neurological disorders</li>
+                                <li>Brain and spinal cord diseases</li>
+                                <li>Headache and pain management</li>
+                            {% elif doctor.specialization == 'Orthopedic' %}
+                                <li>Joint and bone disorders</li>
+                                <li>Sports medicine</li>
+                                <li>Orthopedic surgery</li>
+                            {% elif doctor.specialization == 'Pediatrician' %}
+                                <li>Child healthcare</li>
+                                <li>Developmental disorders</li>
+                                <li>Preventive pediatric care</li>
+                            {% elif doctor.specialization == 'Psychiatrist' %}
+                                <li>Mental health disorders</li>
+                                <li>Behavioral therapy</li>
+                                <li>Psychological assessment</li>
+                            {% elif doctor.specialization == 'Oncologist' %}
+                                <li>Cancer diagnosis and treatment</li>
+                                <li>Chemotherapy management</li>
+                                <li>Cancer prevention</li>
+                            {% elif doctor.specialization == 'Gynecologist' %}
+                                <li>Women's reproductive health</li>
+                                <li>Obstetrics</li>
+                                <li>Fertility treatments</li>
+                            {% elif doctor.specialization == 'Endocrinologist' %}
+                                <li>Hormone disorders</li>
+                                <li>Diabetes management</li>
+                                <li>Thyroid conditions</li>
+                            {% elif doctor.specialization == 'Ophthalmologist' %}
+                                <li>Eye disorders and diseases</li>
+                                <li>Vision correction</li>
+                                <li>Eye surgery</li>
+                            {% elif doctor.specialization == 'ENT Specialist' %}
+                                <li>Ear, nose, and throat disorders</li>
+                                <li>Hearing problems</li>
+                                <li>Sinus treatments</li>
+                            {% elif doctor.specialization == 'Urologist' %}
+                                <li>Urinary tract disorders</li>
+                                <li>Kidney conditions</li>
+                                <li>Male reproductive health</li>
+                            {% elif doctor.specialization == 'Gastroenterologist' %}
+                                <li>Digestive system disorders</li>
+                                <li>Liver diseases</li>
+                                <li>Nutritional counseling</li>
+                            {% elif doctor.specialization == 'Pulmonologist' %}
+                                <li>Respiratory diseases</li>
+                                <li>Lung function testing</li>
+                                <li>Sleep disorders</li>
+                            {% elif doctor.specialization == 'Rheumatologist' %}
+                                <li>Autoimmune diseases</li>
+                                <li>Joint inflammation</li>
+                                <li>Chronic pain management</li>
+                            {% else %}
+                                <li>General healthcare</li>
+                                <li>Preventive medicine</li>
+                                <li>Patient education</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('recommended_doctors') }}" class="btn btn-secondary me-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                        <form action="{{ url_for('select_doctor', doctor_id=doctor.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-check-circle me-2"></i>Select This Doctor
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

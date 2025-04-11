@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 mb-3">Find the Right Doctor for Your Needs</h1>
+        <p class="lead mb-4">Connect with specialized healthcare professionals based on your symptoms</p>
+        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-info btn-lg">Get Started</a>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">How MediConnect Works</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-notes-medical"></i>
+                        </div>
+                        <h3>Describe Your Symptoms</h3>
+                        <p>Tell us what you're experiencing and our system will analyze your symptoms.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3>Find Specialists</h3>
+                        <p>We'll match you with doctors specialized in treating your specific condition.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h3>Connect Instantly</h3>
+                        <p>Choose your preferred doctor and get connected for expert medical consultation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Specialties Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <h2 class="text-center mb-5">Medical Specialties</h2>
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-heartbeat mb-3 text-info fa-2x"></i>
+                        <h5>Cardiology</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-brain mb-3 text-info fa-2x"></i>
+                        <h5>Neurology</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-bone mb-3 text-info fa-2x"></i>
+                        <h5>Orthopedics</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-lungs mb-3 text-info fa-2x"></i>
+                        <h5>Pulmonology</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-baby mb-3 text-info fa-2x"></i>
+                        <h5>Pediatrics</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-venus mb-3 text-info fa-2x"></i>
+                        <h5>Gynecology</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-eye mb-3 text-info fa-2x"></i>
+                        <h5>Ophthalmology</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 speciality-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-stomach mb-3 text-info fa-2x"></i>
+                        <h5>Gastroenterology</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('patient_dashboard') }}" class="btn btn-outline-info btn-lg">Find Your Specialist</a>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card bg-dark">
+                    <div class="card-body p-5 text-center">
+                        <h2 class="mb-3">Ready to find the right medical care?</h2>
+                        <p class="lead mb-4">Our intelligent system matches your symptoms with the most appropriate medical specialists.</p>
+                        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-info btn-lg">Start Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Login - MediConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-dark">
+                    <h2 class="text-center mb-0">
+                        <i class="fas fa-user-md me-2 text-info"></i>
+                        Doctor Login
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <p class="lead">Access your patient records and appointment details</p>
+                    </div>
+                    
+                    <form action="{{ url_for('doctor_login') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="doctor_id" class="form-label">Doctor ID</label>
+                            <input type="text" class="form-control" id="doctor_id" name="doctor_id" required>
+                            <small class="form-text text-muted">Your ID is the number assigned to you in the system.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <small class="form-text text-muted">Default password is your ID followed by "123"</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="mb-0">Having trouble logging in? Contact the administrator.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-secondary mt-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-shield-alt fa-2x text-info"></i>
+                    </div>
+                    <div>
+                        <h5>Secure Access</h5>
+                        <p class="mb-0">This portal is exclusively for registered medical professionals. Unauthorized access attempts are monitored and logged.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

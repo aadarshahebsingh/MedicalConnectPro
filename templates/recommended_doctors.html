@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Recommended Doctors - MediConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">
+        <i class="fas fa-user-md text-info me-2"></i>
+        Recommended {{ specialist }}s
+    </h2>
+    
+    <div class="alert alert-info mb-4">
+        <div class="d-flex">
+            <div class="me-3">
+                <i class="fas fa-info-circle fa-2x"></i>
+            </div>
+            <div>
+                <h5>Based on your symptoms</h5>
+                <p class="mb-0">Based on your description: "{{ symptoms }}", we recommend consulting with a {{ specialist }}.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for doctor in doctors %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 doctor-card">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-md fa-4x text-info"></i>
+                    </div>
+                    <h4 class="card-title text-center mb-3">{{ doctor.name }}</h4>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-stethoscope me-2 text-info"></i>Specialty:</span>
+                            <span class="badge bg-info rounded-pill">{{ doctor.specialization }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-calendar-alt me-2 text-info"></i>Experience:</span>
+                            <span>{{ doctor.experience }} Years</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-phone me-2 text-info"></i>Contact:</span>
+                            <span>{{ doctor.phone_number }}</span>
+                        </li>
+                    </ul>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('doctor_profile', doctor_id=doctor.id) }}" class="btn btn-outline-info">
+                            View Profile
+                        </a>
+                        <form action="{{ url_for('select_doctor', doctor_id=doctor.id) }}" method="POST">
+                            <button type="submit" class="btn btn-info w-100">
+                                <i class="fas fa-check-circle me-2"></i>Select This Doctor
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-5">
+        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Update Symptoms
+        </a>
+    </div>
+</div>
+{% endblock %}

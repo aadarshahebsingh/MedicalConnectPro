@@ -1,0 +1,101 @@
+/* Custom styles to complement Bootstrap */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.hero-section {
+    padding: 4rem 0;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('https://cdn.pixabay.com/photo/2020/03/30/09/15/doctor-4983476_1280.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--bs-info);
+}
+
+.doctor-card {
+    transition: transform 0.3s;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.symptom-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.dashboard-stats {
+    background-color: var(--bs-dark);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.patient-record {
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--bs-info);
+    padding-left: 1rem;
+}
+
+.history-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--bs-info);
+}
+
+.history-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.history-item::before {
+    content: '';
+    position: absolute;
+    left: -2.5rem;
+    top: 0.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: var(--bs-info);
+}
+
+.specialty-chart-container {
+    height: 400px;
+    margin-bottom: 2rem;
+}
+
+.status-pending {
+    color: var(--bs-warning);
+}
+
+.status-completed {
+    color: var(--bs-success);
+}
+
+.status-cancelled {
+    color: var(--bs-danger);
+}
